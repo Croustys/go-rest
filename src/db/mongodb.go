@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -18,7 +20,12 @@ type User struct {
 }
 
 func Insert(name string, email string) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(""))
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err.Error())
+	}
+	mongo_uri := os.Getenv("MONGO_URI")
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongo_uri))
 	if err != nil {
 		log.Fatal(err)
 	}
