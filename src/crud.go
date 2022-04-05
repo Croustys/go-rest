@@ -12,7 +12,23 @@ func createUser(c *gin.Context) {
 	var user db.User
 
 	if c.ShouldBind(&user) != nil {
-		log.Fatalf("Error")
+		log.Fatalf("Error createUser")
 	}
-	db.Insert(user.Name, user.Email)
+	if db.Insert(user.Name, user.Password, user.Email) {
+		c.JSON(200, gin.H{
+			"message": "user created",
+		})
+	}
+}
+func loginUser(c *gin.Context) {
+	var user db.User
+
+	if c.ShouldBind(&user) != nil {
+		log.Fatalf("Error loginUser")
+	}
+	if db.Login(user.Email, user.Password) {
+		c.JSON(200, gin.H{
+			"message": "login successfull",
+		})
+	}
 }

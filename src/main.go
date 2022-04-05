@@ -7,6 +7,7 @@ import (
 func main() {
 	router := gin.Default()
 	router.POST("/user", createUser)
+	router.POST("/login", loginUser)
 
 	router.Run("localhost:8080")
 }
