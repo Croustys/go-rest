@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"snaptalk-api/src/db"
+	"github.com/Croustys/go-rest/pkg/db"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,4 +31,15 @@ func loginUser(c *gin.Context) {
 			"message": "login successfull",
 		})
 	}
+}
+func findPartner(c *gin.Context) {
+	var user db.User
+
+	if c.ShouldBind(&user) != nil {
+		log.Fatalf("Error findPartner")
+	}
+	//business logic matching partners
+	c.JSON(200, gin.H{
+		"partnerId": user.ID.String(),
+	})
 }
