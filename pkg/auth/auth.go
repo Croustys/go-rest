@@ -2,9 +2,11 @@ package auth
 
 import (
 	"log"
+	"os"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type Claims struct {
@@ -12,7 +14,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var secret_token string = "secret_token"
+var secret_token string
 
 func AuthUser(c *gin.Context) bool {
 	tok, err := c.Cookie("Auth_token")
@@ -29,6 +31,7 @@ func verifyToken(tokenString string) bool {
 		if !ok {
 			log.Println(ok)
 		}
+		setSecretToken()
 		return []byte(secret_token), nil
 	})
 
@@ -42,11 +45,20 @@ func verifyToken(tokenString string) bool {
 func GenerateToken(c *gin.Context) {
 	new_token := jwt.New(jwt.SigningMethodHS256)
 
-	//@TODO: change secret_token to os.env secret
+	setSecretToken()
 	tokenString, err := new_token.SignedString([]byte(secret_token))
 	if err != nil {
 		log.Println(err)
 	}
 
 	c.SetCookie("Auth_token", tokenString, 86400, "", "", false, true)
+}
+
+func setSecretToken() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	secret_token = os.Getenv("JWT_TOKEN")
 }
