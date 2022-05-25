@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 
+	"github.com/Croustys/go-rest/pkg/auth"
 	"github.com/Croustys/go-rest/pkg/db"
 
 	"github.com/gin-gonic/gin"
@@ -21,14 +23,28 @@ func createUser(c *gin.Context) {
 	}
 }
 func loginUser(c *gin.Context) {
+	if auth.AuthUser(c) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Authorized",
+		})
+		return
+	}
+
 	var user db.User
 
 	if c.ShouldBind(&user) != nil {
 		log.Fatalf("Error loginUser")
 	}
-	if db.Login(user.Email, user.Password) {
-		c.JSON(200, gin.H{
-			"message": "login successfull",
+
+	if user.Email != "" && db.Login(user.Email, user.Password) {
+		auth.GenerateToken(c)
+
+		c.JSON(http.StatusOK, gin.H{
+			"message": "login successful",
+		})
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unsuccessful Auth",
 		})
 	}
 }

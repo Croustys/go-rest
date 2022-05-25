@@ -72,6 +72,7 @@ func Login(email string, pwd string) bool {
 	if err != nil {
 		log.Println(err.Error())
 	}
+
 	mongo_uri := os.Getenv("MONGO_URI")
 	client, err := mongo.NewClient(options.Client().ApplyURI(mongo_uri))
 	if err != nil {
