@@ -7,8 +7,8 @@ import (
 func main() {
 	router := gin.Default()
 	router.POST("/user", createUser)
-	router.POST("/login", loginUser)
-	router.POST("/findPartner", findPartner)
+	router.POST("/login", auth_middleware, loginUser)
+	router.POST("/findPartner", auth_middleware, findPartner)
 
 	router.Run("localhost:8080")
 }

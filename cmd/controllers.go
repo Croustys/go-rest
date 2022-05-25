@@ -22,14 +22,23 @@ func createUser(c *gin.Context) {
 		})
 	}
 }
-func loginUser(c *gin.Context) {
-	if auth.AuthUser(c) {
-		c.JSON(http.StatusOK, gin.H{
+func auth_middleware(c *gin.Context) {
+	isAuthorized := auth.AuthUser(c)
+	isLoginRequest := c.Request.URL.String() == "/login"
+
+	if isAuthorized && isLoginRequest {
+		c.AbortWithStatusJSON(http.StatusOK, gin.H{
 			"message": "Authorized",
 		})
-		return
+	} else if isAuthorized || isLoginRequest {
+		c.Next()
+	} else {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"message": "Unsuccessful Auth",
+		})
 	}
-
+}
+func loginUser(c *gin.Context) {
 	var user db.User
 
 	if c.ShouldBind(&user) != nil {
