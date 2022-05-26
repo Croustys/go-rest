@@ -1,11 +1,13 @@
 package main
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 
 	"github.com/Croustys/go-rest/pkg/auth"
 	"github.com/Croustys/go-rest/pkg/db"
+	"github.com/markbates/goth/gothic"
 
 	"github.com/gin-gonic/gin"
 )
@@ -67,4 +69,35 @@ func findPartner(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"partnerId": user.ID.String(),
 	})
+}
+
+func oauthLogin(c *gin.Context) {
+	q := c.Request.URL.Query()
+	q.Add("provider", c.Param("provider"))
+	c.Request.URL.RawQuery = q.Encode()
+
+	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+	if err != nil {
+		return
+	}
+	t, _ := template.New("foo").Parse(UserTemplate)
+	t.Execute(c.Writer, user)
+}
+func authProvider(c *gin.Context) {
+	//Building query beacuse gothic doesn't handle gin request
+	q := c.Request.URL.Query()
+	q.Add("provider", c.Param("provider"))
+	c.Request.URL.RawQuery = q.Encode()
+
+	if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
+		t, _ := template.New("foo").Parse(UserTemplate)
+		t.Execute(c.Writer, gothUser)
+	} else {
+		gothic.BeginAuthHandler(c.Writer, c.Request)
+	}
+}
+func logoutProvider(c *gin.Context) {
+	gothic.Logout(c.Writer, c.Request)
+	c.Writer.Header().Set("Location", "/")
+	c.Writer.WriteHeader(http.StatusTemporaryRedirect)
 }
