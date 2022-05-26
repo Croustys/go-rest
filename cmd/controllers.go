@@ -72,9 +72,7 @@ func findPartner(c *gin.Context) {
 }
 
 func oauthLogin(c *gin.Context) {
-	q := c.Request.URL.Query()
-	q.Add("provider", c.Param("provider"))
-	c.Request.URL.RawQuery = q.Encode()
+	set_request_provider(c)
 
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
@@ -84,10 +82,7 @@ func oauthLogin(c *gin.Context) {
 	t.Execute(c.Writer, user)
 }
 func authProvider(c *gin.Context) {
-	//Building query beacuse gothic doesn't handle gin request
-	q := c.Request.URL.Query()
-	q.Add("provider", c.Param("provider"))
-	c.Request.URL.RawQuery = q.Encode()
+	set_request_provider(c)
 
 	if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
 		t, _ := template.New("foo").Parse(UserTemplate)
