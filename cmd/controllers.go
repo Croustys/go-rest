@@ -36,7 +36,7 @@ func auth_middleware(c *gin.Context) {
 		c.Next()
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{
-			"message": "Unsuccessful Auth",
+			"message": "Unsuccessful Authorization",
 		})
 	}
 }
