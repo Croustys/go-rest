@@ -33,5 +33,5 @@ func main() {
 		chat.ServeChat(hub, c.Writer, c.Request)
 	})
 
-	router.Run("localhost:3000")
+	router.Run("localhost:3001")
 }
