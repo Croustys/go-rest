@@ -9,6 +9,8 @@ require (
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 )
 
+require github.com/gorilla/websocket v1.5.0
+
 require (
 	cloud.google.com/go v0.67.0 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
