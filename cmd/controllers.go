@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Croustys/go-rest/pkg/auth"
+	"github.com/Croustys/go-rest/pkg/chat"
 	"github.com/Croustys/go-rest/pkg/db"
 	"github.com/markbates/goth/gothic"
 
@@ -19,7 +20,7 @@ func createUser(c *gin.Context) {
 		log.Fatalf("Error createUser")
 	}
 	if db.Insert(user.Name, user.Password, user.Email) {
-		c.JSON(200, gin.H{
+		c.JSON(http.StatusOK, gin.H{
 			"message": "user created",
 		})
 	}
@@ -95,4 +96,7 @@ func logoutProvider(c *gin.Context) {
 	gothic.Logout(c.Writer, c.Request)
 	c.Writer.Header().Set("Location", "/")
 	c.Writer.WriteHeader(http.StatusTemporaryRedirect)
+}
+func chatHandler(c *gin.Context) {
+	chat.ServeChat(Hub, c.Writer, c.Request)
 }

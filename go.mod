@@ -11,6 +11,8 @@ require (
 
 require github.com/gorilla/websocket v1.5.0
 
+require github.com/gin-contrib/cors v1.3.1 // indirect
+
 require (
 	cloud.google.com/go v0.67.0 // indirect
 	github.com/gorilla/context v1.1.1 // indirect
