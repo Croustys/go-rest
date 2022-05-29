@@ -1,14 +1,15 @@
 package main
 
 import (
-	"html/template"
+	"context"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/Croustys/go-rest/pkg/auth"
 	"github.com/Croustys/go-rest/pkg/chat"
 	"github.com/Croustys/go-rest/pkg/db"
-	"github.com/markbates/goth/gothic"
 
 	"github.com/gin-gonic/gin"
 )
@@ -72,31 +73,45 @@ func findPartner(c *gin.Context) {
 	})
 }
 
-func oauthLogin(c *gin.Context) {
-	set_request_provider(c)
-
-	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
+func authProvider(c *gin.Context) {
+	_, err := getUserInfo(c.Request.FormValue("state"), c.Request.FormValue("code"))
 	if err != nil {
+		log.Println(err.Error())
+		http.Redirect(c.Writer, c.Request, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	t, _ := template.New("foo").Parse(UserTemplate)
-	t.Execute(c.Writer, user)
+	//fmt.Fprintf(c.Writer, "Content: %s\n", content)
+	//log.Println(content)
 }
-func authProvider(c *gin.Context) {
-	set_request_provider(c)
-
-	if gothUser, err := gothic.CompleteUserAuth(c.Writer, c.Request); err == nil {
-		t, _ := template.New("foo").Parse(UserTemplate)
-		t.Execute(c.Writer, gothUser)
-	} else {
-		gothic.BeginAuthHandler(c.Writer, c.Request)
+func oauthLogin(c *gin.Context) {
+	url := googleOauthConfig.AuthCodeURL("pseudo-random")
+	http.Redirect(c.Writer, c.Request, url, http.StatusTemporaryRedirect)
+}
+func getUserInfo(state string, code string) ([]byte, error) {
+	if state != "pseudo-random" {
+		return nil, fmt.Errorf("invalid oauth state")
 	}
+	token, err := googleOauthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
+	}
+	response, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
+	if err != nil {
+		return nil, fmt.Errorf("failed getting user info: %s", err.Error())
+	}
+	defer response.Body.Close()
+	contents, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed reading response body: %s", err.Error())
+	}
+	return contents, nil
 }
-func logoutProvider(c *gin.Context) {
+
+/* func logoutProvider(c *gin.Context) {
 	gothic.Logout(c.Writer, c.Request)
 	c.Writer.Header().Set("Location", "/")
 	c.Writer.WriteHeader(http.StatusTemporaryRedirect)
-}
+} */
 func chatHandler(c *gin.Context) {
 	chat.ServeChat(Hub, c.Writer, c.Request)
 }

@@ -7,22 +7,27 @@ import (
 	"github.com/Croustys/go-rest/pkg/chat"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/markbates/goth"
-	"github.com/markbates/goth/gothic"
-	"github.com/markbates/goth/providers/google"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
-var Hub *chat.Hub
+var (
+	googleOauthConfig *oauth2.Config
+	Hub               *chat.Hub
+)
 
 func main() {
 	router := gin.Default()
 	setup_env()
 
-	gothic.Store = setup_store()
-
-	goth.UseProviders(
-		google.New(os.Getenv("CLIENT_ID"), os.Getenv("CLIENT_SECRET"), "http://localhost:3000/auth/google/callback", "email", "profile"),
-	)
+	googleOauthConfig = &oauth2.Config{
+		RedirectURL:  "http://localhost:3001/auth/google/callback",
+		ClientID:     os.Getenv("CLIENT_ID"),
+		ClientSecret: os.Getenv("CLIENT_SECRET"),
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
+		Endpoint:     google.Endpoint,
+	}
 
 	Hub := chat.CreateHub()
 	go Hub.Run()
@@ -42,9 +47,8 @@ func main() {
 	router.POST("/register", createUser)
 	router.POST("/login", auth_middleware, loginUser)
 	router.POST("/findPartner", auth_middleware, findPartner)
-	router.GET("/auth/:provider/callback", oauthLogin)
-	router.GET("/auth/:provider", authProvider)
-	router.GET("/logout/:provider", logoutProvider)
+	router.GET("/auth/google", oauthLogin)
+	router.GET("/auth/google/callback", authProvider)
 	router.GET("/ws", auth_middleware, chatHandler)
 
 	router.Run("localhost:3001")

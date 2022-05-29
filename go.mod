@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/joho/godotenv v1.4.0
-	go.mongodb.org/mongo-driver v1.8.4
+	go.mongodb.org/mongo-driver v1.9.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 )
 
@@ -20,8 +20,8 @@ require (
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/sessions v1.1.1
 	github.com/markbates/goth v1.72.0
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/oauth2 v0.0.0-20200902213428-5d25da1a8d43 // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
 	google.golang.org/appengine v1.6.6 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 )
@@ -48,7 +48,7 @@ require (
 	github.com/xdg-go/stringprep v1.0.2 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	golang.org/x/sync v0.0.0-20200625203802-6e8e738ad208 // indirect
-	golang.org/x/sys v0.0.0-20210615035016-665e8c7367d1 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
