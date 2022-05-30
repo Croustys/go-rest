@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -73,15 +74,32 @@ func findPartner(c *gin.Context) {
 	})
 }
 
+type userData struct {
+	Id             int
+	Email          string
+	Verified_email bool
+	Picture        string
+}
+
+var accesToken string
+
 func authProvider(c *gin.Context) {
-	_, err := getUserInfo(c.Request.FormValue("state"), c.Request.FormValue("code"))
+	log.Println(c.Request.FormValue("code"))
+	content, err := getUserInfo(c.Request.FormValue("state"), c.Request.FormValue("code"))
 	if err != nil {
 		log.Println(err.Error())
 		http.Redirect(c.Writer, c.Request, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	//fmt.Fprintf(c.Writer, "Content: %s\n", content)
-	//log.Println(content)
+
+	var user userData
+	json.Unmarshal(content, &user)
+	//@TODO: save user
+	url := "http://localhost:3000/account?token=" + accesToken
+	if err != nil {
+		log.Println(err)
+	}
+	http.Redirect(c.Writer, c.Request, url, http.StatusSeeOther)
 }
 func oauthLogin(c *gin.Context) {
 	url := googleOauthConfig.AuthCodeURL("pseudo-random")
@@ -92,6 +110,7 @@ func getUserInfo(state string, code string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
+	accesToken = token.AccessToken
 	if err != nil {
 		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
