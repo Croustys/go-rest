@@ -47,6 +47,7 @@ func main() {
 	router.POST("/register", createUser)
 	router.POST("/login", auth_middleware, loginUser)
 	router.POST("/findPartner", auth_middleware, findPartner)
+	router.GET("/user/:email", findUser)
 	router.GET("/auth/google", oauthLogin)
 	router.GET("/auth/google/callback", authProvider)
 	router.GET("/ws", auth_middleware, chatHandler)

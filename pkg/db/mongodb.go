@@ -104,3 +104,70 @@ func Login(email string, pwd string) bool {
 	}
 	return true
 }
+
+func SaveOauth(email string) bool {
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	mongo_uri := os.Getenv("MONGO_URI")
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongo_uri))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
+
+	database := client.Database("main")
+	userDB := database.Collection("users")
+	newUser := User{
+		Name:  email,
+		Email: email,
+	}
+	insertUser, err := userDB.InsertOne(ctx, newUser)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(insertUser.InsertedID)
+
+	return true
+}
+
+func GetUser(email string) User {
+
+	err := godotenv.Load()
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	mongo_uri := os.Getenv("MONGO_URI")
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongo_uri))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer client.Disconnect(ctx)
+
+	var user User
+	database := client.Database("main")
+	userDB := database.Collection("users")
+
+	err = userDB.FindOne(ctx, bson.D{primitive.E{Key: "email", Value: email}}).Decode(&user)
+	if err != nil {
+		log.Println(err)
+	}
+	return user
+}

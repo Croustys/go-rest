@@ -27,6 +27,13 @@ func createUser(c *gin.Context) {
 		})
 	}
 }
+func findUser(c *gin.Context) {
+	email := c.Param("email")
+	user := db.GetUser(email)
+	c.JSON(http.StatusOK, gin.H{
+		"user": user,
+	})
+}
 func auth_middleware(c *gin.Context) {
 	isAuthorized := auth.AuthUser(c)
 	isLoginRequest := c.Request.URL.String() == "/login"
@@ -81,7 +88,7 @@ type userData struct {
 	Picture        string
 }
 
-var accesToken string
+//var accesToken string
 
 func authProvider(c *gin.Context) {
 	log.Println(c.Request.FormValue("code"))
@@ -94,8 +101,12 @@ func authProvider(c *gin.Context) {
 
 	var user userData
 	json.Unmarshal(content, &user)
-	//@TODO: save user
-	url := "http://localhost:3000/account?token=" + accesToken
+
+	if !db.SaveOauth(user.Email) {
+		log.Println("Couldn't save user")
+		return
+	}
+	url := "http://localhost:3000/account" /* ?token=" + accesToken */
 	if err != nil {
 		log.Println(err)
 	}
@@ -110,7 +121,7 @@ func getUserInfo(state string, code string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
-	accesToken = token.AccessToken
+	//accesToken = token.AccessToken
 	if err != nil {
 		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
