@@ -88,7 +88,7 @@ type userData struct {
 	Picture        string
 }
 
-//var accesToken string
+var accesToken string
 
 func authProvider(c *gin.Context) {
 	log.Println(c.Request.FormValue("code"))
@@ -106,10 +106,11 @@ func authProvider(c *gin.Context) {
 		log.Println("Couldn't save user")
 		return
 	}
-	url := "http://localhost:3000/account" /* ?token=" + accesToken */
+	url := "http://localhost:3000/account"
 	if err != nil {
 		log.Println(err)
 	}
+	c.SetCookie("access_token", accesToken, 86400, "", "", false, true)
 	http.Redirect(c.Writer, c.Request, url, http.StatusSeeOther)
 }
 func oauthLogin(c *gin.Context) {
@@ -121,7 +122,7 @@ func getUserInfo(state string, code string) ([]byte, error) {
 		return nil, fmt.Errorf("invalid oauth state")
 	}
 	token, err := googleOauthConfig.Exchange(context.Background(), code)
-	//accesToken = token.AccessToken
+	accesToken = token.AccessToken
 	if err != nil {
 		return nil, fmt.Errorf("code exchange failed: %s", err.Error())
 	}
